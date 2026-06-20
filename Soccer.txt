@@ -208,10 +208,15 @@
 
 <script>
     // ==========================================
-    // ⚠️ 사용자 설정 영역 (여기에 Supabase 정보 입력)
+    // ⚠️ 환경 변수 설정 (Vercel 배포 시 자동 주입)
+    // 로컬 개발 시에는 .env 파일 또는 직접 값을 입력하세요.
     // ==========================================
-    const SUPABASE_URL = 'https://ilupwanzouluaxpdombp.supabase.co'; // 실제 URL 로 변경 필요
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsdXB3YW56b3VsdWF4cGRvbWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMDExNTEsImV4cCI6MjA5Njc3NzE1MX0.9w3TKY1WGmCj_KARqW8E4bPa14_bX8Jo4eHehqiufJU';
+
+    // Vercel 환경 변수에서 값을 가져옵니다. 
+    // 정적 호스팅의 경우 빌드 시점에 주입되거나, 
+    // Vercel 의 정적 사이트 환경 변수 기능을 사용합니다.
+    const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
+    const SUPABASE_ANON_KEY = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key';
 
     // Supabase 클라이언트 초기화
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -226,7 +231,7 @@
     const alertBox = document.getElementById('alertBox');
     const userNameInput = document.getElementById('userName');
 
-    // 버튼 요소 참조 (이벤트 바인딩용)
+    // 버튼 요소 참조
     const loginBtn = document.getElementById('loginBtn');
     const backBtn = document.getElementById('backBtn');
     const submitBtn = document.getElementById('submitBtn');
@@ -243,17 +248,17 @@
         // 초기 데이터 로드
         loadVotes();
 
-        // [수정] 인라인 onclick 대신 addEventListener 사용
+        // 이벤트 리스너 등록
         loginBtn.addEventListener('click', handleLogin);
         backBtn.addEventListener('click', goBackUp);
         adminBackBtn.addEventListener('click', goBackUp);
         submitBtn.addEventListener('click', submitVote);
         resetBtn.addEventListener('click', resetData);
 
-        // 라디오 버튼 변경 이벤트 (위임 방식 사용)
+        // 라디오 버튼 변경 이벤트
         document.querySelector('.radio-group').addEventListener('change', handleResultChange);
 
-        // 점수 입력 이벤트 (위임 방식 사용)
+        // 점수 입력 이벤트
         document.querySelectorAll('.score-input').forEach(input => {
             input.addEventListener('input', validateScores);
         });
@@ -309,7 +314,6 @@
         const isAdmin = (name.toUpperCase() === 'ADMIN');
 
         // 중복 체크 (관리자 제외)
-        // 주의: votes 배열에 isAdmin 속성이 없으므로 이름만 비교
         const isDuplicate = votes.some(v => v.name === name);
 
         if (isAdmin) {
@@ -463,7 +467,7 @@
         });
     }
 
-    function resetData() {
+    async function resetData() {
         if (!confirm("정말로 모든 투표 데이터를 삭제하시겠습니까?")) return;
 
         try {
